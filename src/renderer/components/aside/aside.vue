@@ -162,7 +162,7 @@
       this.$nextTick(() => {
         this.$refs.menu.updateActiveName();
       });
-      console.log("store", this.$store.state.Counter.main);
+      // console.log("store", this.$store.state.Counter.main);
     }
   };
 </script>

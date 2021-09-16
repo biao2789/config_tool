@@ -1,6 +1,8 @@
 import Vue from 'vue'
 import axios from 'axios'
 import iView from 'iview'
+import ElementUI from 'element-ui';
+import 'element-ui/lib/theme-chalk/index.css';
 // import ViewUI from 'view-design';//升级4.0.0
 import Router from 'vue-router'
 import App from './App'
@@ -19,6 +21,7 @@ import './assets/less/common.less';
 
 Vue.use(Router)
 Vue.use(iView)
+Vue.use(ElementUI);
 // Vue.use(ViewUI);
 
 

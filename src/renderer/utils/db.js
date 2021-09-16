@@ -26,7 +26,7 @@ db.serialize(() => {
   db.run(
     `CREATE TABLE IF NOT EXISTS panel(
       id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-      name VARCHAR(125) NOT NULL,
+      name VARCHAR(125) NOT NULL UNIQUE,
       create_time TIMESTAMP NOT NULL,
       update_time TIMESTAMP NOT NULL 
       )`, err => {
@@ -36,25 +36,31 @@ db.serialize(() => {
 
   db.run(`CREATE TABLE IF NOT EXISTS type(
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    panel_id INTEGER NOT NULL,
-    name VARCHAR(125) NOT NULL,
+    panel_name VARCHAR(125) NOT NULL,
+    name VARCHAR(125) NOT NULL UNIQUE,
+    protocol VARCHAR(125),
     create_time TIMESTAMP NOT NULL,
     update_time TIMESTAMP NOT NULL,
-    FOREIGN KEY (panel_id) REFERENCES PANEL(id)
+    FOREIGN KEY (panel_name) REFERENCES PANEL(name)
     )`, err => {
     logger(err);
   });
 
   db.run(`CREATE TABLE IF NOT EXISTS device(
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    type_id INTEGER NOT NULL,
-    name VARCHAR(125) NOT NULL,
+    panel_name VARCHAR(125) NOT NULL,
+    type_name VARCHAR(125) NOT NULL,
+    name VARCHAR(125) NOT NULL UNIQUE,
     station_id INTEGER,
     ip VARCHAR(125),
-    port INTEGER,    
+    port INTEGER,
+    client_id INTEGER,
+    username  VARCHAR(125),
+    password VARCHAR(125),
     create_time TIMESTAMP NOT NULL,
     update_time TIMESTAMP NOT NULL,
-    FOREIGN KEY (type_id) REFERENCES TYPE(id)
+    FOREIGN KEY (panel_name) REFERENCES PANEL(name)   
+    FOREIGN KEY (type_name) REFERENCES TYPE(name)
     )`, err => {
     logger(err);
   });

@@ -34,7 +34,7 @@
 <template>
   <footer>
     <section class="bottom">
-      xpoct-tool
+      Easy-Onboarding
     </section>
     <section class="version">
       {{updateText}}

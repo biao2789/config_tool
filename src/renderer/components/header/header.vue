@@ -51,40 +51,7 @@
               color="white" />
       </b>
     </section>
-    <!-- <section class="version">
-      {{updateText}}
-      <Tooltip transfer
-               v-if="downloadInfo.percent !== null">
-        <Progress :percent="downloadInfo.percent"
-                  status="active"
-                  style="width: 150px;position: relative;top: -2px;"
-                  hide-info></Progress>
-        <div slot="content">
-          <p>{{updateInfo.releaseName}}</p>
-          <p>大小：{{downloadInfo.totalMB}}MB</p>
-          <p>速度：{{downloadInfo.KBPerSecond}}KB/s</p>
-        </div>
-      </Tooltip>
-  </section> -->
-
-    <!-- <section class="left">
-      <p>Admin</p>
-
-    </section> -->
-
-    <!-- <el-dropdown>
-      <el-button type="primary">
-        更多菜单<i class="el-icon-arrow-down el-icon--right"></i>
-      </el-button>
-      <el-dropdown-menu slot="dropdown">
-        <el-dropdown-item>黄金糕</el-dropdown-item>
-        <el-dropdown-item>狮子头</el-dropdown-item>
-        <el-dropdown-item>螺蛳粉</el-dropdown-item>
-        <el-dropdown-item>双皮奶</el-dropdown-item>
-        <el-dropdown-item>蚵仔煎</el-dropdown-item>
-      </el-dropdown-menu>
-    </el-dropdown> -->
-
+   
     <p>Admin</p>
     
     <section class="right">
