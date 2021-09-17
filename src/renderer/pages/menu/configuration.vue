@@ -57,6 +57,7 @@ export default {
       if (this.filterProtocol !== "") {
         list = list.filter((item) => item.protocol === this.filterProtocol);
       }
+      console.log(list);
       return list;
     },
   },

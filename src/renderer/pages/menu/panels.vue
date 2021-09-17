@@ -62,8 +62,8 @@
         <Button
           type="primary"
           v-if="!modalParams.id"
-          @click="addConfirm"
           :loading="modalBtnLoading"
+          @click="addConfirm"
           >Save
         </Button>
         <Button
@@ -75,37 +75,21 @@
         </Button>
       </div>
     </Modal>
-    <Modal v-model="delModalShow" width="370">
-      <p slot="header" style="color: #f60; text-align: center">
-        <Icon type="information-circled"></Icon>
-        <span>删除确认</span>
-      </p>
-      <div style="text-align: center; line-height: 26px">
-        <p>
-          将永久删除
-          <strong>{{ modalParams.name }}</strong>
-          ，并删除该物品所有进出明细，且<strong>无法恢复</strong>。
-        </p>
-        <p>请输入该物品品名以确认删除。</p>
-        <Input v-model="modalParams.input" style="width: 250px"></Input>
-      </div>
-      <div slot="footer">
-        <Button
-          type="error"
-          size="large"
-          long
-          @click="delConfrim"
-          :loading="modalBtnLoading"
-          :disabled="modalParams.name !== modalParams.input"
-          >删除
-        </Button>
-      </div>
+
+    <Modal
+      v-model="delModalShow"
+      title="Delete Panel"
+      :loading="loading"
+      @on-ok="delConfirm"
+      width="370"
+    >
+      <h4>确定删除？</h4>
     </Modal>
+
   </div>
 </template>
 <script>
 import util from "../../utils/util";
-import download from "../../utils/download";
 
 export default {
   data() {
@@ -114,6 +98,7 @@ export default {
       downloadExcelLoading: false,
       modalBtnLoading: false,
       tableLoading: false,
+      loading: true,
       search: {
         name: "",
         remark: "",
@@ -340,9 +325,10 @@ export default {
     },
     // 新增确认
     addConfirm() {
+      this.modalBtnLoading = true;
+      setTimeout(() =>{
       this.$refs.formVali.validate((valid) => {
         if (valid) {
-          this.modalBtnLoading = true;
           const modalParams = this.modalParams;
           // 检测品名是否存在
           const SQL = `SELECT COUNT(id) AS totalCount from PANEL WHERE name = '${modalParams.name}'`;
@@ -384,6 +370,8 @@ export default {
           });
         }
       });
+      },2000)
+      
     },
     // Export Json
     export(row) {
@@ -483,106 +471,44 @@ export default {
       this.delModalShow = true;
     },
     //  删除确认
-    delConfrim() {
-      this.$db.serialize(() => {
-        this.$db.run("BEGIN");
-        // 删除所有明细
-        const deleteDetailSQL = `DELETE FROM GOODS_DETAIL_LIST WHERE goods_id = ${this.modalParams.id}`;
-        this.$logger(deleteDetailSQL);
-        this.$db.run(deleteDetailSQL, (err) => {
-          if (err) {
-            this.$logger(err);
-            this.$db.run("ROLLBACK");
-            this.$Notice.error({
-              title: "删除失败",
-              desc: err,
-            });
-          }
-        });
-        const deleteSQL = `DELETE FROM GOODS WHERE id = ${this.modalParams.id}`;
-        this.$logger(deleteSQL);
-        this.$db.run(deleteSQL, (err) => {
-          if (err) {
-            this.$logger(err);
-            this.$db.run("ROLLBACK");
-            this.$Notice.error({
-              title: "删除失败",
-              desc: err,
-            });
-          }
-        });
-        this.$db.run("COMMIT");
-        this.delModalShow = false;
-        this.$Message.success({
-          content: "删除成功",
-        });
-        this.getDataList();
-      });
-    },
-    // 导出表格
-    downloadExcel() {
-      this.downloadExcelLoading = true;
-      this.$db.all(this.downloadExcelSQL, (err, res) => {
-        if (err) {
-          this.$logger(err);
-          this.$Notice.error({
-            title: "搜索失败",
-            desc: err,
-          });
-        } else {
-          const data = [
-            [
-              "品名",
-              "数量",
-              "标准进价",
-              "标准售价",
-              "总金额",
-              "备注",
-              "创建时间",
-              "修改时间",
-            ],
-          ];
-          for (const item of res) {
-            data.push([
-              item.name,
-              item.total_count,
-              item.standard_buy_unit_price,
-              item.standard_sell_unit_price,
-              item.total_amount,
-              item.remark,
-              util.dateFilter(item.create_time),
-              util.dateFilter(item.update_time),
-            ]);
-          }
-          const name = "物品管理";
-          download
-            .excel(name, [
-              {
-                name,
-                data,
-              },
-            ])
-            .then((arg) => {
-              this.downloadExcelLoading = false;
-              if (arg === "completed") {
-                this.$Message.success({
-                  content: "导出成功",
-                });
-              } else {
-                this.$Message.warning({
-                  content: "导出取消",
-                });
-              }
-            })
-            .catch((err) => {
-              this.downloadExcelLoading = false;
+    delConfirm() {
+      setTimeout(() => {
+        this.$db.serialize(() => {
+          this.$db.run("BEGIN");
+          // 删除所有明细
+          //原生sql语句中字符串字段需要加引号；
+          const deleteDetailSQL = `DELETE FROM device WHERE panel_name='${this.modalParams.name}'`;
+          this.$logger(deleteDetailSQL);
+          this.$db.run(deleteDetailSQL, (err) => {
+            if (err) {
+              this.$logger(err);
+              this.$db.run("ROLLBACK");
               this.$Notice.error({
-                title: "导出失败",
+                title: "Delete device Failed!",
                 desc: err,
               });
-            });
-        }
-      });
+            }
+          });
+          const deleteSQL = `DELETE FROM panel WHERE id=${this.modalParams.id}`;
+          this.$logger(deleteSQL);
+          this.$db.run(deleteSQL, (err) => {
+            if (err) {
+              this.$logger(err);
+              this.$db.run("ROLLBACK");
+              this.$Notice.error({
+                title: "Delete panel Failed!",
+                desc: err,
+              });
+            }
+          });
+          this.$db.run("COMMIT");
+          this.delModalShow = false;
+          this.$Message.success({
+            content: "Delete Successful!",
+          });
+          this.getDataList();
+        });
+      }, 2000);
     },
   },
   created() {

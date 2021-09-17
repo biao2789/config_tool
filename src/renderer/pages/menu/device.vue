@@ -13,8 +13,8 @@
       <el-button
         type="primary"
         icon="el-icon-plus"
-        @click.prevent="dialogFormVisible = true"
         circle
+        @click.prevent="addDevice"
       ></el-button>
       <h4>{{ info.type }}</h4>
 
@@ -23,20 +23,42 @@
 
     <!-- form dialog -->
     <el-dialog title="Device Parameters" :visible.sync="dialogFormVisible">
-      <el-form :model="form" ref="form">
-        <el-form-item label="DeviceName" :label-width="formLabelWidth">
+      <!-- <el-form :model="form" >
+        <el-form-item v-for="(value,key) in form" :label="key" :label-width="formLabelWidth">
+          <el-input v-model="form.key"></el-input>
+        </el-form-item>
+      </el-form> -->
+
+      <el-form label-position="left" :model="form" ref="form">
+        <el-form-item label="Device Name" :label-width="formLabelWidth">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="Station ID" :label-width="formLabelWidth">
+        <el-form-item label="Station ID" v-if="if_show_station_id" :label-width="formLabelWidth">
           <el-input v-model="form.station_id"></el-input>
         </el-form-item>
+        <el-form-item label="IP Address" v-if="if_show_ip" :label-width="formLabelWidth">
+          <el-input v-model="form.ip"></el-input>
+        </el-form-item>
+        <el-form-item label="Device Port" v-if="if_show_port" :label-width="formLabelWidth">
+          <el-input v-model="form.port"></el-input>
+        </el-form-item>
+        <el-form-item label="Client ID" v-if="if_show_client_id" :label-width="formLabelWidth">
+          <el-input v-model="form.client_id"></el-input>
+        </el-form-item>                            
+        <el-form-item label="Username" v-if="if_show_username" :label-width="formLabelWidth">
+          <el-input v-model="form.username"></el-input>
+        </el-form-item>    
+        <el-form-item label="Password" v-if="if_show_password" :label-width="formLabelWidth">
+          <el-input v-model="form.password"></el-input>
+        </el-form-item>            
       </el-form>
+
       <div slot="footer" class="dialog-footer">
         <el-button @click.prevent="cancelSumbit">Cancel</el-button>
         <el-button type="primary" @click.prevent="sumbitForm">Save</el-button>
       </div>
     </el-dialog>
-
+    <!-- table dialog -->
     <el-dialog title="Device Info" :visible.sync="dialogTableVisible">
       <Table
         border
@@ -131,19 +153,49 @@ export default {
       dialogFormVisible: false,
       form: {
         name: "",
-        region: "",
         station_id: "",
-        date2: "",
-        delivery: false,
-        type: [],
-        resource: "",
-        desc: "",
+        ip:'',
+        port:'',
+        client_id: "",
+        username: "",
+        password: ""
+       
       },
+      if_show_station_id:false,
+      if_show_ip:false,
+      if_show_port:false,
+      if_show_client_id:false,
+      if_show_username:false,
+      if_show_password:false,
+  
       formLabelWidth: "120px",
     };
   },
   methods: {
+    addDevice(){
+      console.log(this.info.protocol);
+      if (this.info.protocol=="Modbus"){
+        this.if_show_station_id=true;
+
+      }else if (this.info.protocol=="IEC61850"){
+          this.if_show_ip=true;
+          this.if_show_port=true;
+      }
+      else{
+          this.if_show_ip=true;
+          this.if_show_port=true;
+          this.if_show_client_id=true;
+          this.if_show_username=true;
+          this.if_show_password=true;
+      }
+      this.dialogFormVisible = true;
+    },
+    subtractDevice() {
+		this.dialogTableVisible = true,
+		this.getData();
+    },
     sumbitForm() {
+      console.log(this.form);
     //   console.log("sumbitForm=======");
       var SQL = "";
       if (this.info.protocol == "Modbus") {
@@ -184,10 +236,6 @@ export default {
       this.dialogFormVisible = false;
       // this.$store.commit("addCart", this.info.id);
     },
-    subtractDevice() {
-		this.dialogTableVisible = true,
-		this.getData();
-    },
     cancelSumbit() {
       console.log("cancelSave=========");
       this.$refs.form.resetFields();
@@ -223,7 +271,7 @@ export default {
             this.$logger(err);
             this.$db.run("ROLLBACK");
             this.$Notice.error({
-              title: "删除失败",
+              title: "Delete Failed!",
               desc: err,
             });
           }
@@ -231,7 +279,7 @@ export default {
         this.$db.run("COMMIT");
         this.dialogTableVisible= false;
         this.$Message.success({
-          content: "删除成功",
+          content: "Delete successful!",
         });
 		this.reload();
       });

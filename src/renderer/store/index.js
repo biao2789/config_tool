@@ -3,7 +3,6 @@ import Vuex from 'vuex'
 
 import { createPersistedState, createSharedMutations } from 'vuex-electron'
 
-// import modules from './modules'
 import device_data from '../device.js'
 Vue.use(Vuex)
 
@@ -71,22 +70,10 @@ export default new Vuex.Store({
     getDeviceList(context) {
       console.log("=====setDeviceList")
       context.commit('setDeviceList', device_data)
-
-      // 真实环境通过 ajax 获取，这里用异步模拟
-      // setTimeout(() => {
-      //     context.commit('setDeviceList', device_data);
-      // }, 500);
     },
     // 购买
     buy(context) {
       context.commit('emptyCart')
-      // 真实环境应通过 ajax 提交购买请求后再清空购物列表
-      // return new Promise(resolve=> {
-      //     setTimeout(() => {
-      //         context.commit('emptyCart');
-      //         resolve();
-      //     }, 500)
-      // });
     }
   },
   // modules
