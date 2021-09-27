@@ -25,15 +25,10 @@ const menu = [
   },
   {
     icon: 'clipboard',
-    title: 'Panel Export',
-    path: '/export/panel/:name',
-    component: require('@/pages/menu/export').default,
-  },
-  {
-    icon: 'clipboard',
     title: 'Device Detail',
     path: '/device/:id',
     component: require('@/pages/menu/dialog').default,
+    hidden:true
   }
 
 

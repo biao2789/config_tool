@@ -60,48 +60,6 @@
         </Tooltip>
       </Menu-item>
     </Menu>
-    <div class="aside-drop-menu">
-      <Dropdown trigger="click"
-                placement="top-start"
-                @on-click="dropMenuClick">
-        <Icon type="navicon-round"
-              :size="30"
-              color="white"></Icon>
-        <DropdownMenu slot="list">
-          <DropdownItem name="update">
-            <Icon type="ios-cloud-download-outline"
-                  :size="18"></Icon>检查更新
-          </DropdownItem>
-          <DropdownItem name="about">
-            <Icon type="ios-person-outline"
-                  :size="18" />关于软件
-          </DropdownItem>
-        </DropdownMenu>
-      </Dropdown>
-    </div>
-    <Modal v-model="modalShow"
-           title="关于">
-      <div class="aboutText">
-        <p>
-          <strong>XPoctTool {{version}}</strong>
-        </p>
-        <p>poct类仪器工具</p>
-        <p>
-          我的邮箱：
-          <strong>632098912@qq.com</strong>
-        </p>
-      </div>
-      <div class="psText">
-        <p>
-          PS：数据与配置文件存放在
-          <a href="javascript:void(0)"
-             @click="openPath(docDir)">{{docDir}}</a>下。若有重装系统等操作，请记得统一备份。
-        </p>
-      </div>
-      <div slot="footer">
-        <Button @click="modalShow = false">关闭</Button>
-      </div>
-    </Modal>
 
   </aside>
 </template>

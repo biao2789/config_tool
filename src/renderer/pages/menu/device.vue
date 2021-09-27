@@ -1,25 +1,26 @@
 <template>
   <div class="product">
-    <router-link :to="'/device/' + info.id" class="product-main">
+    <div class="product-main">
+      <h2>{{ info.type }}</h2>
+
       <img :src="info.image" height="200" width="200" />
 
       <el-button
         type="primary"
         icon="el-icon-minus"
+        style="display: inline; margin-right: 5px"
         circle
-        @click.prevent= "subtractDevice"
+        @click.prevent="subtractDevice"
       ></el-button>
-      {{ getDeviceNums }}
+      <p style="display: inline">{{ getDeviceNums }}</p>
       <el-button
         type="primary"
         icon="el-icon-plus"
+        style="display: inline; margin-left: 5px"
         circle
         @click.prevent="addDevice"
       ></el-button>
-      <h4>{{ info.type }}</h4>
-
-      <div class="product-add-cart" @click.prevent="dialogFormVisible = true">加入购物车</div>
-    </router-link>
+    </div>
 
     <!-- form dialog -->
     <el-dialog title="Device Parameters" :visible.sync="dialogFormVisible">
@@ -33,24 +34,48 @@
         <el-form-item label="Device Name" :label-width="formLabelWidth">
           <el-input v-model="form.name"></el-input>
         </el-form-item>
-        <el-form-item label="Station ID" v-if="if_show_station_id" :label-width="formLabelWidth">
+        <el-form-item
+          label="Station ID"
+          v-if="if_show_station_id"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.station_id"></el-input>
         </el-form-item>
-        <el-form-item label="IP Address" v-if="if_show_ip" :label-width="formLabelWidth">
+        <el-form-item
+          label="IP Address"
+          v-if="if_show_ip"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.ip"></el-input>
         </el-form-item>
-        <el-form-item label="Device Port" v-if="if_show_port" :label-width="formLabelWidth">
+        <el-form-item
+          label="Device Port"
+          v-if="if_show_port"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.port"></el-input>
         </el-form-item>
-        <el-form-item label="Client ID" v-if="if_show_client_id" :label-width="formLabelWidth">
+        <el-form-item
+          label="Client ID"
+          v-if="if_show_client_id"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.client_id"></el-input>
-        </el-form-item>                            
-        <el-form-item label="Username" v-if="if_show_username" :label-width="formLabelWidth">
+        </el-form-item>
+        <el-form-item
+          label="Username"
+          v-if="if_show_username"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.username"></el-input>
-        </el-form-item>    
-        <el-form-item label="Password" v-if="if_show_password" :label-width="formLabelWidth">
+        </el-form-item>
+        <el-form-item
+          label="Password"
+          v-if="if_show_password"
+          :label-width="formLabelWidth"
+        >
           <el-input v-model="form.password"></el-input>
-        </el-form-item>            
+        </el-form-item>
       </el-form>
 
       <div slot="footer" class="dialog-footer">
@@ -73,7 +98,7 @@
 import util from "../../utils/util";
 
 export default {
-  inject:['reload'],
+  inject: ["reload"],
   props: {
     info: Object,
     panel_name: String,
@@ -95,7 +120,7 @@ export default {
         }
       });
       return this.counts;
-    }
+    },
   },
   data() {
     return {
@@ -113,12 +138,12 @@ export default {
         {
           title: "Type Name",
           key: "type_name",
-          align: "center"
+          align: "center",
         },
         {
           title: "Device Name",
           key: "name",
-          align: "center"
+          align: "center",
         },
         {
           title: "Operation",
@@ -154,92 +179,120 @@ export default {
       form: {
         name: "",
         station_id: "",
-        ip:'',
-        port:'',
+        ip: "",
+        port: "",
         client_id: "",
         username: "",
-        password: ""
-       
+        password: "",
       },
-      if_show_station_id:false,
-      if_show_ip:false,
-      if_show_port:false,
-      if_show_client_id:false,
-      if_show_username:false,
-      if_show_password:false,
-  
+      if_show_station_id: false,
+      if_show_ip: false,
+      if_show_port: false,
+      if_show_client_id: false,
+      if_show_username: false,
+      if_show_password: false,
+
       formLabelWidth: "120px",
     };
   },
   methods: {
-    addDevice(){
-      console.log(this.info.protocol);
-      if (this.info.protocol=="Modbus"){
-        this.if_show_station_id=true;
+    addDevice() {
+      // console.log(this.info.protocol);
 
-      }else if (this.info.protocol=="IEC61850"){
-          this.if_show_ip=true;
-          this.if_show_port=true;
-      }
-      else{
-          this.if_show_ip=true;
-          this.if_show_port=true;
-          this.if_show_client_id=true;
-          this.if_show_username=true;
-          this.if_show_password=true;
+      if (this.info.protocol == "MODBUS") {
+        this.if_show_station_id = true;
+      } else if (this.info.protocol == "IEC61850") {
+        this.if_show_ip = true;
+        this.if_show_port = true;
+      } else {
+        this.if_show_ip = true;
+        this.if_show_port = true;
+        this.if_show_client_id = true;
+        this.if_show_username = true;
+        this.if_show_password = true;
       }
       this.dialogFormVisible = true;
     },
     subtractDevice() {
-		this.dialogTableVisible = true,
-		this.getData();
+      (this.dialogTableVisible = true), this.getData();
     },
     sumbitForm() {
-      console.log(this.form);
-    //   console.log("sumbitForm=======");
-      var SQL = "";
-      if (this.info.protocol == "Modbus") {
-        SQL = `INSERT INTO DEVICE (panel_name,type_name,name,station_id,create_time,update_time)
+      this.$refs.form.resetFields();
+      //原子性
+      this.$db.serialize(() => {
+        this.$db.run("BEGIN");
+        const selectSQL = `SELECT name from type where panel_name='${this.panel_name}' and name='${this.info.type}'`;
+        this.$logger(selectSQL);
+        this.$db.all(selectSQL, (err, res) => {
+          console.log(res)
+          if (!res.length) {
+            const insertTypeSQL = `INSERT  INTO type (panel_name,name,protocol,create_time,update_time) VALUES ('${
+              this.panel_name
+            }','${this.info.type}','${
+              this.info.protocol
+            }','${Date.now()}','${Date.now()}') `;
+            this.$logger(insertTypeSQL);
+            this.$db.run(insertTypeSQL, (err) => {
+              if (err) {
+                this.$logger(err);
+                this.$Notice.error({
+                  title: "INSERT type failed",
+                  desc: err,
+                });
+                this.$db.run("ROLLBACK");
+              }
+            });
+          }
+        });
+
+        var SQL = "";
+        if (this.info.protocol == "MODBUS") {
+          SQL = `INSERT INTO DEVICE (panel_name,type_name,name,protocol,station_id,create_time,update_time)
           VALUES ('${this.panel_name}','${this.info.type}','${
-          this.form.name
-        }','${this.form.station_id}','${Date.now()}','${Date.now()}')`;
-      } else if (this.info.protocol == "IEC61850") {
-        SQL = `INSERT INTO DEVICE (panel_name,type_name,name,ip,port,create_time,update_time)
+            this.form.name
+          }','${this.info.protocol}','${
+            this.form.station_id
+          }','${Date.now()}','${Date.now()}')`;
+        } else if (this.info.protocol == "IEC61850") {
+          SQL = `INSERT INTO DEVICE (panel_name,type_name,name,protocol,ip,port,create_time,update_time)
           VALUES ('${this.panel_name}','${this.info.type}','${
-          this.form.name
-        }','${this.form.ip}','${
-          this.form.port
-        }','${Date.now()}','${Date.now()}')`;
-      } else {
-        SQL = `INSERT INTO DEVICE (panel_name,type_name,name,ip,port,client_id,username,password,create_time,update_time)
-          VALUES ('${this.panel_name}','${this.info.type}','${
-          this.form.name
-        }','${this.form.ip}','${this.form.port}','${this.form.client_id}','${
-          this.form.username
-        }','${this.form.password}','${Date.now()}','${Date.now()}')`;
-      }
-      console.log(SQL);
-      this.$db.run(SQL, (err, res) => {
-        if (err) {
-          this.$logger(err);
-          this.$Notice.error({
-            title: "Insert Data Failed",
-            desc: err,
-          });
+            this.form.name
+          }','${this.info.protocol}','${this.form.ip}','${
+            this.form.port
+          }','${Date.now()}','${Date.now()}')`;
         } else {
-          this.$Message.success({
-            content: "Insert successful",
-          });
-          this.counts++;
+          SQL = `INSERT INTO DEVICE (panel_name,type_name,name,protocol,ip,port,client_id,username,password,create_time,update_time)
+          VALUES ('${this.panel_name}','${this.info.type}','${
+            this.form.name
+          }','${this.info.protocol}','${this.form.ip}','${this.form.port}','${
+            this.form.client_id
+          }','${this.form.username}','${
+            this.form.password
+          }','${Date.now()}','${Date.now()}')`;
         }
+        console.log(SQL);
+        this.$db.run(SQL, (err, res) => {
+          if (err) {
+            this.$logger(err);
+            this.$Notice.error({
+              title: "Insert Data Failed",
+              desc: err,
+            });
+            this.$db.run("ROLLBACK");
+          }
+        });
+        this.$db.run("COMMIT");
+        this.counts++;
+        this.dialogFormVisible = false;
+        this.$Message.success({
+          content: "Successful!",
+        });
       });
-      this.dialogFormVisible = false;
-      // this.$store.commit("addCart", this.info.id);
     },
     cancelSumbit() {
       console.log("cancelSave=========");
       this.$refs.form.resetFields();
-      console.log(this.$refs.form.resetFields());
+      // console.log(this.$refs.form.resetFields());
       this.dialogFormVisible = false;
     },
     getData() {
@@ -259,8 +312,8 @@ export default {
         }
       });
     },
-	del(row){
-		// console.log(row);
+    del(row) {
+      // console.log(row);
       this.$db.serialize(() => {
         this.$db.run("BEGIN");
         // 删除所有明细
@@ -277,17 +330,15 @@ export default {
           }
         });
         this.$db.run("COMMIT");
-        this.dialogTableVisible= false;
+        this.dialogTableVisible = false;
         this.$Message.success({
           content: "Delete successful!",
         });
-		this.reload();
+        this.reload();
       });
-	}
+    },
   },
-  mounted() {
-
-  },
+  mounted() {},
 };
 </script>
 <style scoped>
@@ -308,6 +359,10 @@ export default {
 }
 .product-main img {
   width: 100%;
+}
+.product-main h2 {
+  text-align: center;
+  color: #2d8cf0;
 }
 h4 {
   color: #222;

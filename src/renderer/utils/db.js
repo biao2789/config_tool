@@ -37,7 +37,7 @@ db.serialize(() => {
   db.run(`CREATE TABLE IF NOT EXISTS type(
     id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
     panel_name VARCHAR(125) NOT NULL,
-    name VARCHAR(125) NOT NULL UNIQUE,
+    name VARCHAR(125) NOT NULL,
     protocol VARCHAR(125),
     create_time TIMESTAMP NOT NULL,
     update_time TIMESTAMP NOT NULL,
@@ -51,6 +51,7 @@ db.serialize(() => {
     panel_name VARCHAR(125) NOT NULL,
     type_name VARCHAR(125) NOT NULL,
     name VARCHAR(125) NOT NULL UNIQUE,
+    protocol VARCHAR(125) NOT NULL,
     station_id INTEGER,
     ip VARCHAR(125),
     port INTEGER,
@@ -61,48 +62,6 @@ db.serialize(() => {
     update_time TIMESTAMP NOT NULL,
     FOREIGN KEY (panel_name) REFERENCES PANEL(name)   
     FOREIGN KEY (type_name) REFERENCES TYPE(name)
-    )`, err => {
-    logger(err);
-  });
-
-  db.run(`CREATE TABLE IF NOT EXISTS GOODS(
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    standard_buy_unit_price DECIMAL(15,2) NOT NULL,
-    standard_sell_unit_price DECIMAL(15,2) NOT NULL,
-    total_amount DECIMAL(15,2) NOT NULL,
-    total_count DECIMAL(15,3) NOT NULL,
-    remark VARCHAR(255) NOT NULL,
-    create_time INTEGER NOT NULL,
-    update_time INTEGER NOT NULL
-    )`, err => {
-    logger(err);
-  });
-
-  /**
-   * 进出明细表 GOODS_DETAIL_LIST
-   * goods_id 物品id
-   * count 计数（+加 -减）
-   * actual_buy_unit_price 实际进价
-   * actual_sell_unit_price 实际售价
-   * amount 实际金额
-   * remark 备注
-   * latest 是否某物品最新一条记录（不是最新操作无法删除）（1是 0不是）
-   * create_time 创建时间
-   * update_time 修改时间
-   */
-  db.run(`CREATE TABLE IF NOT EXISTS GOODS_DETAIL_LIST(
-    id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL,
-    goods_id INTEGER NOT NULL, 
-    count DECIMAL(15,3) NOT NULL,
-    actual_sell_unit_price DECIMAL(15,2) NOT NULL,
-    actual_buy_unit_price DECIMAL(15,2) NOT NULL,
-    amount DECIMAL(15,2) NOT NULL,
-    remark VARCHAR(255) NOT NULL,
-    latest INTEGER NOT NULL,
-    create_time INTEGER NOT NULL,
-    update_time INTEGER NOT NULL,
-    FOREIGN KEY (goods_id) REFERENCES GOODS(id)
     )`, err => {
     logger(err);
   });

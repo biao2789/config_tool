@@ -1,39 +1,36 @@
 <template>
-    <div v-show="list.length">
-      <p>panel_name :  {{name}} </p>   
+  <div v-show="list.length">
+    <h1 style="margin-bottom: 10px; text-align: center">Panel Configuration</h1>
+    <el-button type="primary" style="margin: 5px 20px" @click="goBack"
+      >Back</el-button
+    >
 
-      <div> 
-        <h1 style="text-align:center;display:inline">Panel Configuration</h1>
-        <el-button type='primary' style="margin-left:820px;display:inline">Save</el-button>   
-        <el-button type='primary' style="float:right;display:inline">Cancel</el-button>   
-      </div> 
-      
-      <div class="list-control">
-        <div class="list-control-filter">
-          <span>Protocol：</span>
-          <span
-            class="list-control-filter-item"
-            :class="{ on: item === filterProtocol }"
-            v-for="item in protocols"
-            @click="handleFilterProtocol(item)"
-            >{{ item }}</span
-          >
+    <div class="list-control">
+      <div class="list-control-filter">
+        <div>Protocol：</div>
+        <div
+          class="list-control-filter-item"
+          :class="{ on: item === filterProtocol }"
+          v-for="item in protocols"
+          @click="handleFilterProtocol(item)"
+        >
+          {{ item }}
         </div>
       </div>
-
-      <Device
-        v-for="item in filteredAndOrderedList"
-        :info="item"
-        :panel_name="name"
-        :key="item.id"
-      ></Device>
-      <div class="product-not-found" v-show="!filteredAndOrderedList.length">
-        暂无相关商品
-      </div>
     </div>
+
+    <Device
+      v-for="item in filteredAndOrderedList"
+      :info="item"
+      :panel_name="name"
+      :key="item.id"
+    ></Device>
+    <div class="product-not-found" v-show="!filteredAndOrderedList.length">
+      暂无相关商品
+    </div>
+  </div>
 </template>
 <script>
-
 import Device from "./device.vue";
 export default {
   name: "configuration",
@@ -42,13 +39,11 @@ export default {
   },
   computed: {
     list() {
-        // console.log("list is==========");
-        // console.log(this.$store)
-        // console.log(this.$store.state.deviceList);
+      // console.log("list is==========");
+      // console.log(this.$store.state.deviceList);
       return this.$store.state.deviceList;
     },
     protocols() {
-        // console.log("protocols is==========");
       return this.$store.getters.protocols;
     },
     filteredAndOrderedList() {
@@ -57,32 +52,32 @@ export default {
       if (this.filterProtocol !== "") {
         list = list.filter((item) => item.protocol === this.filterProtocol);
       }
-      console.log(list);
       return list;
     },
   },
   data() {
     return {
-      name:'',
-      filterProtocol: "",
+      name: "",
+      filterProtocol: "MODBUS",
     };
   },
   methods: {
+    goBack() {
+      this.$router.go(-1);
+    },
     handleFilterProtocol(protocol) {
       if (this.filterProtocol === protocol) {
         this.filterProtocol = "";
       } else {
         this.filterProtocol = protocol;
       }
-    }
+    },
   },
   mounted() {
-    // this.id = this.$route.params.id;
-    // console.log(this.id);
     this.name = this.$route.params.name;
-    console.log(this.name);
-    this.$store.dispatch('getDeviceList');
-    console.log('getDeviceList')
+    // console.log(this.name);
+    this.$store.dispatch("getDeviceList");
+    console.log("getDeviceList");
   },
 };
 </script>
@@ -93,7 +88,10 @@ export default {
   border-radius: 6px;
   margin: 16px;
   padding: 16px;
-  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2);
+  font-size: 16px;
+  /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); */
+  border: 1px solid ;
+
 }
 .list-control-filter {
   margin-bottom: 16px;

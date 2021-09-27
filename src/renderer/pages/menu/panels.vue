@@ -1,80 +1,97 @@
 <template>
   <div>
     <div>
-      <h1 style="display: inline">My Panels</h1>
+      <h1 style="magin: 10px">My Panels</h1>
       <el-button
         type="primary"
-        icon="el-icon-circle-plus"
-        style="float: right; display: inline"
-        @click="add"
+        style="float: right; margin-right: 45px; font-size: 1.5em"
+        @click.prevent="add"
         >Create</el-button
       >
       <br />
-      <br />
     </div>
 
-    <Table
-      border
-      stripe
-      :columns="dataList_table_column"
-      :data="dataList"
-      :loading="tableLoading"
-      @on-row-dblclick="tableRowDblClick"
-    ></Table>
-    <Page
-      :total="dataListTotalCount"
-      :current="searchParams.pageIndex"
-      :page-size="searchParams.pageSize"
-      @on-change="getDataList"
-      @on-page-size-change="getDataListOnPageChange"
-      :page-size-opts="[10, 20, 30, 40, 50]"
-      show-total
-      show-sizer
-      show-elevator
-      transfer
-    ></Page>
-    <Modal
-      v-model="modalShow"
+    <div>
+      <Table
+        border
+        stripe
+        size="large"
+        style="margin-top: 30px"
+        :columns="dataList_table_column"
+        :data="dataList"
+        :loading="tableLoading"
+        @on-row-dblclick="tableRowDblClick"
+      ></Table>
+
+      <Page
+        :total="dataListTotalCount"
+        :current="searchParams.pageIndex"
+        :page-size="searchParams.pageSize"
+        @on-change="getDataList"
+        @on-page-size-change="getDataListOnPageChange"
+        :page-size-opts="[10, 20, 30, 40, 50]"
+        show-total
+        show-sizer
+        show-elevator
+        transfer
+      ></Page>
+    </div>
+
+    <!-- <Modal
+      v-model="modalView"
       :mask-closable="false"
-      :title="modalTitle"
-      @on-cancel="modalShow = false"
+      title="Configuration Overview"
+      @on-cancel="modalView = false"
+      width="60"
+      class="font-size-base:50px"
     >
       <div>
-        <Form
-          ref="formVali"
-          :model="modalParams"
-          :rules="ruleValidate"
-          label-position="right"
-          :label-width="130"
-          @keydown.native.enter.prevent="enterConfirm(modalParams.id)"
-        >
-          <FormItem label="Panel Name" prop="name">
-            <Input
-              v-model="modalParams.name"
-              placeholder="Required, length is lower than 100"
-              style="width: 250px"
-            ></Input>
-          </FormItem>
-        </Form>
+        <Recursion :list="list"></Recursion>
       </div>
       <div slot="footer">
-        <Button @click="modalShow = false"> Cancel </Button>
-        <Button
-          type="primary"
-          v-if="!modalParams.id"
-          :loading="modalBtnLoading"
-          @click="addConfirm"
-          >Save
-        </Button>
-        <Button
-          type="primary"
-          v-if="modalParams.id"
-          @click="editConfirm"
-          :loading="modalBtnLoading"
-          >Save
-        </Button>
+        <Button type="default" @click.prevent="modalView = false">Close</Button>
       </div>
-    </Modal>
+    </Modal> -->
+
+    <el-dialog
+      title="Overview"
+      :visible.sync="centerDialogVisible"
+      width="60%"
+      center
+    >
+      <el-tree
+        :data="list"
+        :props="defaultProps"
+        @node-click="handleNodeClick"
+      ></el-tree>
+
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="centerDialogVisible = false"
+          >确 定</el-button
+        >
+      </span>
+    </el-dialog>
+
+    <el-dialog :title="title" :visible.sync="dialogFormVisible">
+      <el-form :model="form" ref="form" :rules="ruleValidate">
+        <el-form-item
+          label="Panel Name"
+          :label-width="formLabelWidth"
+          prop="name"
+        >
+          <el-input v-model="form.name" autocomplete="off"></el-input>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="cancelDialog('form')">Cancel</el-button>
+        <el-button type="primary" v-if="!form.id" @click="sumbitForm('form')"
+          >Sumbit</el-button
+        >
+        <el-button type="primary" v-if="form.id" @click="editConfirm('form')"
+          >Edit</el-button
+        >
+      </div>
+    </el-dialog>
 
     <Modal
       v-model="delModalShow"
@@ -83,50 +100,69 @@
       @on-ok="delConfirm"
       width="370"
     >
-      <h4>确定删除？</h4>
+      <h4>Sure to delete？</h4>
     </Modal>
-
   </div>
 </template>
 <script>
 import util from "../../utils/util";
-
+import Recursion from "../../components/recursion/recursion.vue";
 export default {
+  components: { Recursion },
   data() {
     return {
-      // loading
-      downloadExcelLoading: false,
       modalBtnLoading: false,
       tableLoading: false,
       loading: true,
+      centerDialogVisible: false,
+      dialogFormVisible: false,
+      formLabelWidth: "120px",
+      form: {
+        name: "",
+      },
+      ruleValidate: {
+        name: [
+          { required: true, message: "Please input panel name" },
+          { max: 100, message: "Panel Name is lower than 100 chars" },
+        ],
+      },
       search: {
         name: "",
         remark: "",
         sort: "DESC",
         totalMax: null,
         totalMin: null,
-        buyPriceMax: null,
-        buyPriceMin: null,
-        sellPriceMax: null,
-        sellPriceMin: null,
         pageIndex: 1,
         pageSize: 10,
       },
       searchParams: {},
       dataList: [],
       dataListTotalCount: 0,
+      list: [],
+      defaultProps: { children: "children", label: "label" },
+      // list:  [
+      //   {
+      //     label: 'Device',
+      //     children: [
+      //       {
+      //       label: 'MCU-MH',
+      //       children: [{
+      //         label: 'MCU-MH-1'
+      //       },{
+      //         label: 'MCU-MH-2'
+      //       }]
+      //     }]
+      //   } ],
       dataList_table_column: [
         {
           title: "Panel Name",
           key: "name",
           align: "center",
-          // minWidth: 200,
         },
         {
           title: "Last Update",
           key: "update_time",
           align: "center",
-          // minWidth: 150,
           render: (h, params) => {
             return h("span", util.dateFilter(params.row.update_time));
           },
@@ -134,7 +170,6 @@ export default {
         {
           title: "Operation",
           key: "action",
-          // width: 130,
           align: "center",
           fixed: "right",
           render: (h, params) => {
@@ -142,8 +177,8 @@ export default {
               h("Button", {
                 props: {
                   type: "primary",
-                  size: "small",
-                  icon: "upload",
+                  size: "large",
+                  icon: "ios-download-outline",
                 },
                 attrs: {
                   title: "Export",
@@ -157,14 +192,14 @@ export default {
               h("Button", {
                 props: {
                   type: "primary",
-                  size: "small",
+                  size: "large",
                   icon: "ios-list-outline",
                 },
                 attrs: {
                   title: "View",
                 },
                 style: {
-                  "margin-left": "5px",
+                  "margin-left": "10px",
                 },
                 on: {
                   click: () => {
@@ -175,14 +210,14 @@ export default {
               h("Button", {
                 props: {
                   type: "primary",
-                  size: "small",
+                  size: "large",
                   icon: "settings",
                 },
                 attrs: {
                   title: "Configuration",
                 },
                 style: {
-                  "margin-left": "5px",
+                  "margin-left": "10px",
                 },
                 on: {
                   click: () => {
@@ -193,14 +228,14 @@ export default {
               h("Button", {
                 props: {
                   type: "primary",
-                  size: "small",
+                  size: "large",
                   icon: "edit",
                 },
                 attrs: {
                   title: "Edit",
                 },
                 style: {
-                  "margin-left": "5px",
+                  "margin-left": "10px",
                 },
                 on: {
                   click: () => {
@@ -211,14 +246,14 @@ export default {
               h("Button", {
                 props: {
                   type: "error",
-                  size: "small",
+                  size: "large",
                   icon: "trash-b",
                 },
                 attrs: {
                   title: "Delete",
                 },
                 style: {
-                  "margin-left": "5px",
+                  "margin-left": "10px",
                 },
                 on: {
                   click: () => {
@@ -230,30 +265,139 @@ export default {
           },
         },
       ],
-      modalShow: false,
-      modalParams: {
-        name: "",
-        standard_buy_unit_price: "",
-        standard_sell_unit_price: "",
-        remark: "",
-      },
+
       delModalShow: false,
-      ruleValidate: {
-        name: [
-          { required: true, message: "Please input panel name" },
-          { max: 100, message: "Panel Name is lower than 100 chars" },
-        ],
-      },
+
       downloadExcelSQL: "",
     };
   },
   computed: {
-    modalTitle() {
-      return this.modalParams.id ? "Edit Panel" : "New Panel";
+    title() {
+      return this.form.id ? "Edit Panel" : "New Panel";
     },
   },
   methods: {
+    handleNodeClick(data) {
+      console.log(data);
+    },
+    getList(name) {
+      // console.log(name);
+      var array = [];
+      const SQL = `SELECT protocol,count(id) as COUNT from type WHERE panel_name = '${name}' GROUP BY protocol`;
+      this.$db.all(SQL, (err, res) => {
+        if (res.length) {
+          res.forEach((item) => {
+            var obj = {};
+            obj.label = item.protocol + " Device" + `('${item.COUNT}')`;
+            var array_2 = [];
+            // console.log("1111111");
+            // console.log(item);
+            var type_SQL = `SELECT name from type WHERE panel_name = '${name}' AND protocol='${item.protocol}' GROUP BY name`;
+            this.$db.all(type_SQL, (err, res) => {
+              if (res.length) {
+                res.forEach((a) => {
+                  // console.log("type");
+                  // console.log(a);
+                  var obj_2 = {};
+                  obj_2.label = a.name;
+                  var array_3 = [];
+                  const device_SQL = `SELECT name,station_id,ip,port,client_id,username,password from device WHERE panel_name = '${name}' AND type_name='${a.name}'`;
+                  this.$db.all(device_SQL, (err, res) => {
+                    if (res.length) {
+                      res.forEach((b) => {
+                        var str = "";
+                        for (var i in b) {
+                          if (b[i] != null) {
+                            str += i + ":" + b[i] + " ";
+                          }
+                        }
+                        const obj_3 = {};
+                        obj_3.label = str;
+                        array_3.push(obj_3);
+                      });
+                    }
+                  });
+                  // console.log(array_3)
+                  obj_2.children = array_3;
+                  // console.log(obj_2);
+
+                  array_2.push(obj_2);
+                });
+              }
+            });
+            obj.children = array_2;
+            array.push(obj);
+          });
+        }
+      });
+      console.log("array===");
+      console.log(array);
+      this.list = array;
+      // this.list.concat(array);
+      console.log(this.list);
+    },
+
     // 清空该项输入
+    // getList(name) {
+    //   const array = new Array();
+    //   const SQL = `SELECT protocol,name from type WHERE panel_name = '${name}'`;
+    //   this.$db.all(SQL, (err, res) => {
+    //     if (res.length) {
+    //       res.forEach((item) => {
+    //         // console.log("1111111");
+    //         // console.log(item);
+    //         const obj = new Object();
+    //         obj.label = item.protocol + " Device";
+
+    //         const array_child = new Array();
+
+    //         const obj_child_1 = new Object();
+    //         obj_child_1.label = item.name;
+
+    //         const array_chlid2 = new Array();
+    //         const type_SQL = `SELECT name,station_id,ip,port,client_id,username,password from device WHERE panel_name = '${name}' AND type_name='${item.name}'`;
+    //         this.$db.all(type_SQL, (err, res) => {
+    //           if (res.length) {
+    //             res.forEach((a) => {
+    //               console.log("22222");
+    //               console.log(a);
+
+    //               let str = "";
+    //               for (var i in a) {
+    //                 if (a[i] != null) {
+    //                   str += i + ": " + a[i] + " ";
+    //                 }
+    //               }
+    //               const obj_child = new Object();
+    //               obj_child.label = str;
+    //               // obj_child.type_name = a.type_name;
+
+    //               // obj_child.name = a.name;
+    //               // obj_child.station_id = a.station_id;
+    //               // obj_child.ip = a.ip;
+    //               // obj_child.port = a.port;
+    //               // obj_child.client_id = a.client_id;
+    //               // obj_child.username = a.username;
+    //               array_chlid2.push(obj_child);
+    //             });
+    //           }
+    //         });
+    //         obj_child_1.children = array_chlid2;
+    //          console.log("obj_child_1")
+    //         console.log(obj_child_1)
+    //         array_child.push(obj_child_1);
+
+    //         obj.children = array_child;
+    //         array.push(obj);
+    //       });
+    //     }
+    //   });
+    //   console.log("array===");
+    //   console.log(array);
+    //   this.list = array;
+    //   // console.log("list===");
+    //   // console.log(this.list)
+    // },
     clearInputNumber(max, min) {
       this.search[max] = null;
       this.search[min] = null;
@@ -290,6 +434,7 @@ export default {
             this.getDataList(searchParams.pageIndex - 1);
           } else {
             this.dataList = res;
+            console.log(this.dataList);
           }
         }
         this.tableLoading = false;
@@ -314,24 +459,30 @@ export default {
     },
     // 双击表格某行
     tableRowDblClick(row) {
-      this.direct(row);
+      this.view(row);
     },
     // 新增
     add() {
-      // console.log(this.$refs);
-      this.$refs.formVali.resetFields();
-      this.modalParams = this.$options.data().modalParams;
-      this.modalShow = true;
+      // this.$refs.form.resetFields();
+      this.dialogFormVisible = true;
+      this.form = {
+        name: "",
+      };
+
+      // this.$refs.formVali.resetFields();
+      // this.modalParams = this.$options.data().modalParams;
+      // this.modalShow = true;
     },
     // 新增确认
-    addConfirm() {
-      this.modalBtnLoading = true;
-      setTimeout(() =>{
-      this.$refs.formVali.validate((valid) => {
+    sumbitForm(formName) {
+      // this.$refs[formName].resetFields();
+
+      this.$refs[formName].validate((valid) => {
         if (valid) {
-          const modalParams = this.modalParams;
+          // console.log(this.form);
+          // const modalParams = this.modalParams;
           // 检测品名是否存在
-          const SQL = `SELECT COUNT(id) AS totalCount from PANEL WHERE name = '${modalParams.name}'`;
+          const SQL = `SELECT COUNT(id) AS totalCount from PANEL WHERE name = '${this.form.name}'`;
           this.$db.get(SQL, (err, res) => {
             if (err) {
               this.$logger(err);
@@ -347,7 +498,7 @@ export default {
                 this.modalBtnLoading = false;
               } else {
                 const SQL = `INSERT INTO PANEL (name,create_time,update_time)
-          VALUES ('${modalParams.name}','${Date.now()}','${Date.now()}')`;
+          VALUES ('${this.form.name}','${Date.now()}','${Date.now()}')`;
                 this.$logger(SQL);
                 this.$db.run(SQL, (err) => {
                   if (err) {
@@ -357,7 +508,6 @@ export default {
                       desc: err,
                     });
                   } else {
-                    this.modalShow = false;
                     this.$Message.success({
                       content: "Created Successful",
                     });
@@ -370,25 +520,23 @@ export default {
           });
         }
       });
-      },2000)
-      
+      this.dialogFormVisible = false;
+    },
+
+    cancelDialog(formName) {
+      this.$refs[formName].resetFields();
+      this.dialogFormVisible = false;
     },
     // Export Json
     export(row) {
-      this.$router.push({
-        // name:'export',
-        // params:row.id
-        path: `/export/panel/${row.name}`,
-      });
+      var data = { title: "export" };
+      util.saveJSON(data, "1.json");
     },
     // View detail
     view(row) {
-      this.$router.push({
-        path: `/view/panel/${row.name}`,
-        query: {
-          goods_id: row.id,
-        },
-      });
+      this.centerDialogVisible = true;
+      // console.log(this.list)
+      this.getList(row.name);
     },
     // Configuration
     config(row) {
@@ -398,21 +546,22 @@ export default {
     },
     // 编辑
     edit(row) {
-      this.$refs.formVali.resetFields();
-      this.modalParams = {
+      // this.$refs.resetFields();
+      // this.title=
+      this.form = {
         id: row.id,
         name: row.name,
       };
-      this.modalShow = true;
+      this.dialogFormVisible = true;
     },
     // 编辑确认
-    editConfirm() {
-      this.$refs.formVali.validate((valid) => {
+    editConfirm(formName) {
+      this.$refs[formName].validate((valid) => {
         if (valid) {
-          this.modalBtnLoading = true;
-          const modalParams = this.modalParams;
+          // this.modalBtnLoading = true;
+          // console.log(this.$refs.formVali)
           // 检测品名是否存在
-          const SQL = `SELECT id from PANEL WHERE name = '${modalParams.name}'`;
+          const SQL = `SELECT id from PANEL WHERE name = '${this.form.name}'`;
           this.$db.get(SQL, (err, res) => {
             if (err) {
               this.$logger(err);
@@ -421,16 +570,16 @@ export default {
                 desc: err,
               });
             } else {
-              if (res && res.id !== modalParams.id) {
+              if (res && res.id !== this.form.id) {
                 this.$Message.warning({
                   content: "Name has already exist!",
                 });
                 this.modalBtnLoading = false;
               } else {
                 const SQL = `UPDATE PANEL SET
-          name='${modalParams.name}'
+          name='${this.form.name}'
           ,update_time='${Date.now()}'
-          WHERE id = ${modalParams.id}`;
+          WHERE id = ${this.form.id}`;
                 this.$logger(SQL);
                 this.$db.run(SQL, (err) => {
                   if (err) {
@@ -440,7 +589,7 @@ export default {
                       desc: err,
                     });
                   } else {
-                    this.modalShow = false;
+                    this.dialogFormVisible = false;
                     this.$Message.success({
                       content: "Edit successful",
                     });
@@ -454,11 +603,14 @@ export default {
         }
       });
     },
+
     enterConfirm(id) {
       if (id) {
-        this.editConfirm();
+        console.log(id);
+        this.editConfirm("form");
       } else {
-        this.addConfirm();
+        console.log("sumbit");
+        this.sumbitForm("form");
       }
     },
     // 删除
@@ -489,6 +641,19 @@ export default {
               });
             }
           });
+
+          const deleteTypeSQL = `DELETE FROM type WHERE panel_name='${this.modalParams.name}'`;
+          this.$logger(deleteTypeSQL);
+          this.$db.run(deleteTypeSQL, (err) => {
+            if (err) {
+              this.$logger(err);
+              this.$db.run("ROLLBACK");
+              this.$Notice.error({
+                title: "Delete type Failed!",
+                desc: err,
+              });
+            }
+          });          
           const deleteSQL = `DELETE FROM panel WHERE id=${this.modalParams.id}`;
           this.$logger(deleteSQL);
           this.$db.run(deleteSQL, (err) => {
@@ -516,5 +681,8 @@ export default {
   },
 };
 </script>
-<style lang="less">
+<style >
+.my_dialog {
+  font-size: 40px;
+}
 </style>

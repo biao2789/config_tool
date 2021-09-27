@@ -12,7 +12,7 @@ import filters from './utils/util';
 import db from './utils/db';
 import logger from './utils/logger';
 import routes from './router/route';
-import serialport from "./api/index";
+// import serialport from "./api/index";
 
 import './utils/upgrade';
 import 'iview/dist/styles/iview.css';
@@ -24,6 +24,11 @@ Vue.use(iView)
 Vue.use(ElementUI);
 // Vue.use(ViewUI);
 
+const originalPush = Router.prototype.push
+Router.prototype.push = function push (location) {
+  return originalPush.call(this, location).catch(err => err)
+}
+
 
 Object.keys(filters).forEach(k => Vue.filter(k, filters[k]));
 const router = new Router({
@@ -33,7 +38,7 @@ Vue.prototype.$db = db;
 
 Vue.prototype.$logger = logger;
 
-Vue.prototype.$serialport = serialport
+// Vue.prototype.$serialport = serialport
 
 if (!process.env.IS_WEB) Vue.use(require('vue-electron'))
 Vue.http = Vue.prototype.$http = axios

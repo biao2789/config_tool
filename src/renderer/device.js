@@ -2,7 +2,7 @@ export default [
     {
         id: 1,
         type: 'SD20-UP',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/SD20-UP.jpg',
         station_id: 1,
         ip:"",
@@ -11,7 +11,7 @@ export default [
     {
         id: 2,
         type: 'MCU-MH',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/MCU-MH.jpg',
         station_id: 1,
         ip:"",
@@ -20,7 +20,7 @@ export default [
     {
         id: 3,
         type: 'SKL-1D',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/SKL-1D.jpg',
         station_id: 1,
         ip:"",
@@ -29,8 +29,8 @@ export default [
     {
         id: 4,
         type: 'STHC-1R',
-        protocol: 'Modbus',
-        image: 'static/images/SKL-1D.jpg',
+        protocol: 'MODBUS',
+        image: 'static/images/STHC-1R.jpg',
         station_id: 1,
         ip:"",
         port: 1000
@@ -38,7 +38,7 @@ export default [
     {
         id: 5,
         type: 'SPW2100',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/SPW2100.jpg',
         station_id: 1,
         ip:"",
@@ -47,7 +47,7 @@ export default [
     {
         id: 6,
         type: 'GD20-D',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/GD20-D.jpg',
         station_id: 1,
         ip:"",
@@ -56,7 +56,7 @@ export default [
     {
         id: 7,
         type: 'MIMD10',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/MIMD10.jpg',
         station_id: 1,
         ip:"",
@@ -65,7 +65,7 @@ export default [
     {
         id: 8,
         type: 'PD10-A1',
-        protocol: 'Modbus',
+        protocol: 'MODBUS',
         image: 'static/images/PD10-A1.jpg',
         station_id: 1,
         ip:"",
@@ -75,7 +75,7 @@ export default [
         id: 9,
         type: 'SIPROTECT 7SJ686',
         protocol: 'IEC61850',
-        image: 'static/images/MIMD10.jpg',
+        image: 'static/images/SIPROTECT-7SJ686.jpg',
         station_id: 1,
         ip:"",
         port: 1000
