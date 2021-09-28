@@ -1,13 +1,16 @@
 <template>
   <div>
     <div>
-      <h1 style="magin: 10px">My Panels</h1>
-      <el-button
-        type="primary"
-        style="float: right; margin-right: 45px; font-size: 1.5em"
-        @click.prevent="add"
-        >Create</el-button
-      >
+      <h1 style="margin-left: 20px">My Panels</h1>
+      <div style="margin-right: 20px">
+        <el-button
+          type="primary"
+          style="float: right; font-size: 1.5em"
+          @click.prevent="add"
+          >Create</el-button
+        >
+      </div>
+
       <br />
     </div>
 
@@ -16,7 +19,7 @@
         border
         stripe
         size="large"
-        style="margin-top: 30px"
+        style="margin: 40px 20px"
         :columns="dataList_table_column"
         :data="dataList"
         :loading="tableLoading"
@@ -37,22 +40,6 @@
       ></Page>
     </div>
 
-    <!-- <Modal
-      v-model="modalView"
-      :mask-closable="false"
-      title="Configuration Overview"
-      @on-cancel="modalView = false"
-      width="60"
-      class="font-size-base:50px"
-    >
-      <div>
-        <Recursion :list="list"></Recursion>
-      </div>
-      <div slot="footer">
-        <Button type="default" @click.prevent="modalView = false">Close</Button>
-      </div>
-    </Modal> -->
-
     <el-dialog
       title="Overview"
       :visible.sync="centerDialogVisible"
@@ -60,7 +47,7 @@
       center
     >
       <el-tree
-        :data="list"
+        :data="treeData"
         :props="defaultProps"
         @node-click="handleNodeClick"
       ></el-tree>
@@ -111,6 +98,7 @@ export default {
   components: { Recursion },
   data() {
     return {
+      counts: 0,
       modalBtnLoading: false,
       tableLoading: false,
       loading: true,
@@ -138,21 +126,9 @@ export default {
       searchParams: {},
       dataList: [],
       dataListTotalCount: 0,
-      list: [],
+      treeData: [],
       defaultProps: { children: "children", label: "label" },
-      // list:  [
-      //   {
-      //     label: 'Device',
-      //     children: [
-      //       {
-      //       label: 'MCU-MH',
-      //       children: [{
-      //         label: 'MCU-MH-1'
-      //       },{
-      //         label: 'MCU-MH-2'
-      //       }]
-      //     }]
-      //   } ],
+
       dataList_table_column: [
         {
           title: "Panel Name",
@@ -280,15 +256,47 @@ export default {
     handleNodeClick(data) {
       console.log(data);
     },
+    getDeviceNums(panel_name, protocol) {
+      const SQL = `SELECT name from type WHERE panel_name = '${panel_name}' and protocol = '${protocol}' `;
+      console.log(SQL);
+      var counts = 0;
+
+      this.$db.all(SQL, (err, res) => {
+        console.log(res);
+
+        if (res.length) {
+          res.forEach((item) => {
+            const countSQL = `SELECT count(id) as COUNT from device WHERE panel_name = '${panel_name}' and type_name = '${item.name}' `;
+            console.log(countSQL);
+
+            this.$db.all(countSQL, (err, res) => {
+              res.forEach((item) => {
+                console.log(item.COUNT);
+                counts += item.COUNT;
+                console.log(counts);
+              });
+            });
+          });
+        }
+      });
+      return counts;
+    },
     getList(name) {
       // console.log(name);
       var array = [];
       const SQL = `SELECT protocol,count(id) as COUNT from type WHERE panel_name = '${name}' GROUP BY protocol`;
+
       this.$db.all(SQL, (err, res) => {
         if (res.length) {
           res.forEach((item) => {
             var obj = {};
-            obj.label = item.protocol + " Device" + `('${item.COUNT}')`;
+            // var count = this.getDeviceNums(name, item.protocol);
+            // obj.label = item.protocol + " Device" + ` ( ${count} )`;
+
+
+            obj.label = item.protocol + " Device";
+
+            // obj.label = item.protocol + " Device" + ` ( ${item.COUNT} )`;
             var array_2 = [];
             // console.log("1111111");
             // console.log(item);
@@ -302,102 +310,50 @@ export default {
                   obj_2.label = a.name;
                   var array_3 = [];
                   const device_SQL = `SELECT name,station_id,ip,port,client_id,username,password from device WHERE panel_name = '${name}' AND type_name='${a.name}'`;
-                  this.$db.all(device_SQL, (err, res) => {
-                    if (res.length) {
-                      res.forEach((b) => {
-                        var str = "";
-                        for (var i in b) {
-                          if (b[i] != null) {
-                            str += i + ":" + b[i] + " ";
+                  setTimeout(() => {
+                    this.$db.all(device_SQL, (err, res) => {
+                      if (res.length) {
+                        res.forEach((b) => {
+                          var str = "";
+                          for (var i in b) {
+                            if (b[i] != null) {
+                              str += i.toUpperCase() + ": " + b[i] + ";   ";
+                            }
                           }
-                        }
-                        const obj_3 = {};
-                        obj_3.label = str;
-                        array_3.push(obj_3);
-                      });
-                    }
-                  });
-                  // console.log(array_3)
+                          var obj_3 = {};
+                          obj_3.label = str;
+                          array_3.push(obj_3);
+                        });
+                      }
+                    });
+                  }, 2000);
                   obj_2.children = array_3;
-                  // console.log(obj_2);
-
                   array_2.push(obj_2);
                 });
               }
             });
+
             obj.children = array_2;
             array.push(obj);
           });
         }
       });
+
+      //mock data
+      // var demo_array = [
+      //   { label: "1", children: [{ label: "1-1",children:[{label: "1-1-1"},{label: "1-1-1"}] }, { label: "1-2",children:[{label: "1-2-1"},{label: "1-2-3"}] }] },
+      //   { label: "2", children: [{ label: "2-1",children:[{label: "2-1-1"},{label: "2-1-2"}]  }, { label: "2-2" ,children:[{label: "2-2-1"},{label: "2-2-2"}] }] },
+      // ];
+      // demo_array.push({ label: "3", children: [{ label: "3-1",children:[{label: "3-1-1"},{label: "3-1-2"}] }, { label: "3-2",children:[{label: "3-2-1"},{label: "3-1-3"}] }] })
+      // console.log(demo_array);
+
       console.log("array===");
       console.log(array);
-      this.list = array;
-      // this.list.concat(array);
-      console.log(this.list);
+
+      this.treeData = array;
+      // console.log(this.treeData);
     },
 
-    // 清空该项输入
-    // getList(name) {
-    //   const array = new Array();
-    //   const SQL = `SELECT protocol,name from type WHERE panel_name = '${name}'`;
-    //   this.$db.all(SQL, (err, res) => {
-    //     if (res.length) {
-    //       res.forEach((item) => {
-    //         // console.log("1111111");
-    //         // console.log(item);
-    //         const obj = new Object();
-    //         obj.label = item.protocol + " Device";
-
-    //         const array_child = new Array();
-
-    //         const obj_child_1 = new Object();
-    //         obj_child_1.label = item.name;
-
-    //         const array_chlid2 = new Array();
-    //         const type_SQL = `SELECT name,station_id,ip,port,client_id,username,password from device WHERE panel_name = '${name}' AND type_name='${item.name}'`;
-    //         this.$db.all(type_SQL, (err, res) => {
-    //           if (res.length) {
-    //             res.forEach((a) => {
-    //               console.log("22222");
-    //               console.log(a);
-
-    //               let str = "";
-    //               for (var i in a) {
-    //                 if (a[i] != null) {
-    //                   str += i + ": " + a[i] + " ";
-    //                 }
-    //               }
-    //               const obj_child = new Object();
-    //               obj_child.label = str;
-    //               // obj_child.type_name = a.type_name;
-
-    //               // obj_child.name = a.name;
-    //               // obj_child.station_id = a.station_id;
-    //               // obj_child.ip = a.ip;
-    //               // obj_child.port = a.port;
-    //               // obj_child.client_id = a.client_id;
-    //               // obj_child.username = a.username;
-    //               array_chlid2.push(obj_child);
-    //             });
-    //           }
-    //         });
-    //         obj_child_1.children = array_chlid2;
-    //          console.log("obj_child_1")
-    //         console.log(obj_child_1)
-    //         array_child.push(obj_child_1);
-
-    //         obj.children = array_child;
-    //         array.push(obj);
-    //       });
-    //     }
-    //   });
-    //   console.log("array===");
-    //   console.log(array);
-    //   this.list = array;
-    //   // console.log("list===");
-    //   // console.log(this.list)
-    // },
     clearInputNumber(max, min) {
       this.search[max] = null;
       this.search[min] = null;
@@ -434,7 +390,7 @@ export default {
             this.getDataList(searchParams.pageIndex - 1);
           } else {
             this.dataList = res;
-            console.log(this.dataList);
+            // console.log(this.dataList);
           }
         }
         this.tableLoading = false;
@@ -468,10 +424,6 @@ export default {
       this.form = {
         name: "",
       };
-
-      // this.$refs.formVali.resetFields();
-      // this.modalParams = this.$options.data().modalParams;
-      // this.modalShow = true;
     },
     // 新增确认
     sumbitForm(formName) {
@@ -537,6 +489,7 @@ export default {
       this.centerDialogVisible = true;
       // console.log(this.list)
       this.getList(row.name);
+      // this.sleep(1000);
     },
     // Configuration
     config(row) {
@@ -546,8 +499,6 @@ export default {
     },
     // 编辑
     edit(row) {
-      // this.$refs.resetFields();
-      // this.title=
       this.form = {
         id: row.id,
         name: row.name,
@@ -653,7 +604,7 @@ export default {
                 desc: err,
               });
             }
-          });          
+          });
           const deleteSQL = `DELETE FROM panel WHERE id=${this.modalParams.id}`;
           this.$logger(deleteSQL);
           this.$db.run(deleteSQL, (err) => {
@@ -682,7 +633,12 @@ export default {
 };
 </script>
 <style >
-.my_dialog {
-  font-size: 40px;
+.el-tree-node__label {
+  width: auto;
+  /* margin-top: 12px; */
+  float: right;
+  font-size: 14px;
+  line-height: 25px;
+  letter-spacing: 1px;
 }
 </style>

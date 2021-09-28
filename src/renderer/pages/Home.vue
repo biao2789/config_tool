@@ -59,8 +59,7 @@ export default {
       position: relative;
       top: @view-top;
       right: 0;
-      left: @view-left;
-      bottom: 0;
+      left: 0;
       overflow: auto;
       padding: @view-padding;
   }

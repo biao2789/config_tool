@@ -2,6 +2,7 @@
 @import "../../assets/less/global.less";
 
 header {
+  height: 20px;
   font-family: "Microsoft YaHei";
   font-size: 16px;
   overflow: hidden;
@@ -9,9 +10,12 @@ header {
   -webkit-app-region: drag;
   .left {
     float: left;
-    margin-left: 25px;
+    margin-top :6px; ;
+    margin-left: 10px;
     a {
       -webkit-app-region: no-drag;
+      color:rgb(19,153,147);
+
       margin-left: 10px;
     }
   }
@@ -39,7 +43,7 @@ header {
   <header>
     <div class="left">
       <h1
-        style="font-size:25px;position:relative;font:weight:2000;color:#00CED1"
+        style="font-size:40px;"
       >
         <a href="javascript:void(0)" @click="selectPath"> SIEMENS </a>
       </h1>

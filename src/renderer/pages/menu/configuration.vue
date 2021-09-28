@@ -1,13 +1,22 @@
 <template>
   <div v-show="list.length">
-    <h1 style="margin-bottom: 10px; text-align: center">Panel Configuration</h1>
-    <el-button type="primary" style="margin: 5px 20px" @click="goBack"
-      >Back</el-button
-    >
+    <h1 style="margin: 0px 15px">Panel Configuration</h1>
+    <div style="margin-right: 20px">
+      <el-button
+        type="primary"
+        style="float: right; font-size: 1.5em"
+        @click.prevent="goBack"
+        >Back</el-button
+      >
+    </div>
+
 
     <div class="list-control">
+        <div style="margin: 8px 10px; font-size: 20px">
+          <p><b> Protocol ：</b></p>
+        </div>
       <div class="list-control-filter">
-        <div>Protocol：</div>
+
         <div
           class="list-control-filter-item"
           :class="{ on: item === filterProtocol }"
@@ -89,12 +98,13 @@ export default {
   margin: 16px;
   padding: 16px;
   font-size: 16px;
+  margin-top: 60px;
   /* box-shadow: 0 1px 1px rgba(0, 0, 0, 0.2); */
-  border: 1px solid ;
-
+  border: 1px solid #dddee1;
 }
 .list-control-filter {
   margin-bottom: 16px;
+  margin-left: 30px;
 }
 .list-control-filter-item,
 .list-control-order-item {
@@ -103,6 +113,7 @@ export default {
   border: 1px solid #e9eaec;
   border-radius: 4px;
   margin-right: 6px;
+  margin-left: 10px;
   padding: 2px 6px;
 }
 .list-control-filter-item.on,

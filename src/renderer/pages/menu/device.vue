@@ -83,11 +83,13 @@
         <el-button type="primary" @click.prevent="sumbitForm">Save</el-button>
       </div>
     </el-dialog>
+
     <!-- table dialog -->
     <el-dialog title="Device Info" :visible.sync="dialogTableVisible">
       <Table
         border
         stripe
+        size="large"
         :columns="dataList_table_column"
         :data="dataList"
       ></Table>
@@ -105,7 +107,7 @@ export default {
   },
   computed: {
     getDeviceNums() {
-      const SQL = `SELECT COUNT(id) AS totalCount from DEVICE WHERE panel_name = '${this.panel_name}' and type_name = '${this.info.type}' `;
+       const SQL = `SELECT COUNT(id) AS totalCount from DEVICE WHERE panel_name = '${this.panel_name}' and type_name = '${this.info.type}' `;
       // console.log(SQL)
       this.$db.get(SQL, (err, res) => {
         if (err) {
@@ -155,7 +157,7 @@ export default {
               h("Button", {
                 props: {
                   type: "error",
-                  size: "small",
+                  size: "large",
                   icon: "trash-b",
                 },
                 attrs: {
@@ -224,7 +226,7 @@ export default {
         const selectSQL = `SELECT name from type where panel_name='${this.panel_name}' and name='${this.info.type}'`;
         this.$logger(selectSQL);
         this.$db.all(selectSQL, (err, res) => {
-          console.log(res)
+          console.log(res);
           if (!res.length) {
             const insertTypeSQL = `INSERT  INTO type (panel_name,name,protocol,create_time,update_time) VALUES ('${
               this.panel_name
